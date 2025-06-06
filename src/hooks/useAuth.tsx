@@ -1,6 +1,6 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -25,14 +25,8 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const configured = isSupabaseConfigured();
 
   useEffect(() => {
-    if (!configured) {
-      setLoading(false);
-      return;
-    }
-
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -46,13 +40,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [configured]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
-    if (!configured) {
-      return { error: { message: 'Supabase no está configurado. Por favor configura las variables de entorno.' } };
-    }
-    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -61,10 +51,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string) => {
-    if (!configured) {
-      return { error: { message: 'Supabase no está configurado. Por favor configura las variables de entorno.' } };
-    }
-    
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -73,9 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    if (configured) {
-      await supabase.auth.signOut();
-    }
+    await supabase.auth.signOut();
   };
 
   const value = {
@@ -84,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signIn,
     signUp,
     signOut,
-    isConfigured: configured,
+    isConfigured: true,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

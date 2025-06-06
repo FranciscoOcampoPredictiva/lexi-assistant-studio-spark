@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Scale, AlertCircle } from 'lucide-react';
+import { Scale } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,7 +13,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn, signUp, isConfigured } = useAuth();
+  const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,21 +49,6 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!isConfigured && (
-            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-800">Configuración requerida</p>
-                  <p className="text-xs text-yellow-700">
-                    Necesitas configurar Supabase para usar la autenticación. 
-                    Haz clic en el botón verde "Supabase" en la parte superior.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -74,7 +59,6 @@ const Auth = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="tu@email.com"
-                disabled={!isConfigured}
               />
             </div>
             <div className="space-y-2">
@@ -87,13 +71,12 @@ const Auth = () => {
                 required
                 placeholder="••••••••"
                 minLength={6}
-                disabled={!isConfigured}
               />
             </div>
             {error && (
               <div className="text-red-600 text-sm">{error}</div>
             )}
-            <Button type="submit" className="w-full" disabled={loading || !isConfigured}>
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Cargando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
             </Button>
           </form>
@@ -101,8 +84,7 @@ const Auth = () => {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 hover:underline text-sm disabled:opacity-50"
-              disabled={!isConfigured}
+              className="text-blue-600 hover:underline text-sm"
             >
               {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
             </button>
