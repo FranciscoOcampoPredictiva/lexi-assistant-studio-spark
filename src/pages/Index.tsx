@@ -1,18 +1,20 @@
 
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import Footer from "@/components/Footer";
+import { useAuth } from '@/hooks/useAuth';
+import Auth from '@/components/Auth';
+import Chat from '@/components/Chat';
 
 const Index = () => {
-  return (
-    <div className="min-h-screen">
-      <Header />
-      <Hero />
-      <Features />
-      <Footer />
-    </div>
-  );
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-xl">Cargando...</div>
+      </div>
+    );
+  }
+
+  return user ? <Chat /> : <Auth />;
 };
 
 export default Index;
