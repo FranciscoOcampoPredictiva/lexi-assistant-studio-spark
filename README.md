@@ -42,6 +42,8 @@ cd lexi-assistant-studio-spark
 
 Instala las dependencias:
 
+npm install
+
 Configura tu archivo .env y luego ejecuta:
 
 npm run dev
