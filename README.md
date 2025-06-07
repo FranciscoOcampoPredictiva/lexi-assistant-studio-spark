@@ -1,4 +1,19 @@
-# Welcome to your Lovable project
+# # ⚖️ LexIA – Asistente Jurídico con Supabase y OpenAI
+
+**LexIA** es una aplicación web moderna de asistencia legal impulsada por inteligencia artificial. Permite a usuarios autenticarse, mantener un historial de conversaciones y recibir respuestas jurídicas expertas gracias a la integración con **OpenAI GPT**. El backend se gestiona mediante **Supabase** y la interfaz está diseñada para profesionales del derecho.
+
+---
+
+## 🧠 Funcionalidades principales
+
+- ✅ Autenticación de usuarios con email/contraseña vía Supabase
+- ✅ Interfaz de chat limpia, profesional y responsive
+- ✅ Persistencia de conversaciones y mensajes por usuario (tabla `messages`)
+- ✅ Sidebar con historial agrupado por fecha
+- ✅ Gestión de API Key personal para usar ChatGPT
+- ✅ Prompt especializado en derecho español y europeo
+- ✅ Seguridad mediante políticas RLS correctamente aplicadas
+
 
 ## Project info
 
