@@ -1,6 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   id: string;
@@ -9,19 +10,109 @@ interface Message {
   timestamp: Date;
 }
 
+interface Conversation {
+  id: string;
+  title: string;
+  lastMessage: string;
+  updatedAt: Date;
+}
+
 export const useLegalChat = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: '¡Hola! Soy LexIA, tu asistente legal inteligente. Estoy aquí para ayudarte con consultas jurídicas, análisis de documentos, interpretación de normativa y mucho más. ¿En qué puedo asistirte hoy?',
-      isUser: false,
-      timestamp: new Date(),
-    }
-  ]);
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Cargar conversaciones del usuario
+  const loadConversations = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Agrupar mensajes por conversación (usando la fecha como agrupador simple)
+      const conversationMap = new Map<string, any[]>();
+      
+      data?.forEach(msg => {
+        const dateKey = new Date(msg.created_at).toDateString();
+        if (!conversationMap.has(dateKey)) {
+          conversationMap.set(dateKey, []);
+        }
+        conversationMap.get(dateKey)?.push(msg);
+      });
+
+      const convs: Conversation[] = Array.from(conversationMap.entries()).map(([dateKey, msgs]) => {
+        const lastMsg = msgs[0];
+        const firstUserMsg = msgs.find(m => m.role === 'user');
+        return {
+          id: dateKey,
+          title: firstUserMsg?.content.slice(0, 50) + '...' || 'Nueva conversación',
+          lastMessage: lastMsg.content.slice(0, 100) + '...',
+          updatedAt: new Date(lastMsg.created_at)
+        };
+      });
+
+      setConversations(convs);
+    } catch (error) {
+      console.error('Error cargando conversaciones:', error);
+    }
+  };
+
+  // Cargar mensajes de una conversación específica
+  const loadConversationMessages = async (conversationId: string) => {
+    if (!user) return;
+
+    try {
+      const targetDate = new Date(conversationId);
+      const nextDay = new Date(targetDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', targetDate.toISOString())
+        .lt('created_at', nextDay.toISOString())
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      const msgs: Message[] = data?.map(msg => ({
+        id: msg.id,
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: new Date(msg.created_at)
+      })) || [];
+
+      setMessages(msgs);
+      setCurrentConversationId(conversationId);
+    } catch (error) {
+      console.error('Error cargando mensajes:', error);
+    }
+  };
+
+  // Inicializar con mensaje de bienvenida
+  const initializeChat = () => {
+    const welcomeMessage: Message = {
+      id: 'welcome',
+      text: '¡Hola! Soy LexIA, tu asistente jurídico especializado en Derecho español y europeo. Estoy aquí para ayudarte con consultas jurídicas, análisis de documentos, interpretación de normativa y mucho más. ¿En qué puedo asistirte hoy?',
+      isUser: false,
+      timestamp: new Date(),
+    };
+    setMessages([welcomeMessage]);
+    setCurrentConversationId(null);
+  };
+
+  // Enviar mensaje
   const sendMessage = async (messageText: string) => {
-    if (!messageText.trim()) return;
+    if (!messageText.trim() || !user) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -34,12 +125,26 @@ export const useLegalChat = () => {
     setLoading(true);
 
     try {
+      // Guardar mensaje del usuario en la base de datos
+      const { error: userMsgError } = await supabase
+        .from('messages')
+        .insert({
+          user_id: user.id,
+          role: 'user',
+          content: messageText
+        });
+
+      if (userMsgError) throw userMsgError;
+
       console.log('Enviando mensaje a LexIA:', messageText);
+      
+      // Obtener historial para contexto
+      const conversationHistory = messages.slice(-10);
       
       const { data, error } = await supabase.functions.invoke('chat-legal', {
         body: {
           message: messageText,
-          conversationHistory: messages.slice(-10) // Últimos 10 mensajes para contexto
+          conversationHistory: conversationHistory
         }
       });
 
@@ -59,7 +164,20 @@ export const useLegalChat = () => {
       };
 
       setMessages(prev => [...prev, aiResponse]);
-      console.log('Respuesta de LexIA recibida exitosamente');
+
+      // Guardar respuesta de la IA en la base de datos
+      await supabase
+        .from('messages')
+        .insert({
+          user_id: user.id,
+          role: 'assistant',
+          content: data.response
+        });
+
+      console.log('Respuesta de LexIA recibida y guardada exitosamente');
+      
+      // Recargar conversaciones
+      await loadConversations();
 
     } catch (error) {
       console.error('Error al enviar mensaje:', error);
@@ -77,21 +195,26 @@ export const useLegalChat = () => {
     }
   };
 
-  const clearChat = () => {
-    setMessages([
-      {
-        id: '1',
-        text: '¡Hola! Soy LexIA, tu asistente legal inteligente. Estoy aquí para ayudarte con consultas jurídicas, análisis de documentos, interpretación de normativa y mucho más. ¿En qué puedo asistirte hoy?',
-        isUser: false,
-        timestamp: new Date(),
-      }
-    ]);
+  // Crear nueva conversación
+  const newConversation = () => {
+    initializeChat();
   };
+
+  // Efectos
+  useEffect(() => {
+    if (user) {
+      loadConversations();
+      initializeChat();
+    }
+  }, [user]);
 
   return {
     messages,
+    conversations,
+    currentConversationId,
     loading,
     sendMessage,
-    clearChat
+    newConversation,
+    loadConversationMessages
   };
 };
