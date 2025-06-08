@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLegalChat } from '@/hooks/useLegalChat';
 import { Button } from '@/components/ui/button';
@@ -20,13 +20,24 @@ const Chat = () => {
     loadConversationMessages 
   } = useLegalChat();
   const [inputMessage, setInputMessage] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, loading]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() || loading) return;
 
-    await sendMessage(inputMessage);
-    setInputMessage('');
+    const messageToSend = inputMessage;
+    setInputMessage(''); // Clear input immediately for better UX
+    
+    await sendMessage(messageToSend);
   };
 
   const handleSelectConversation = (conversationId: string) => {
@@ -34,7 +45,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar */}
       <ChatSidebar
         conversations={conversations}
@@ -44,9 +55,9 @@ const Chat = () => {
       />
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <Scale className="h-8 w-8 text-blue-600" />
             <div>
@@ -58,13 +69,20 @@ const Chat = () => {
           </div>
         </header>
 
-        {/* Messages Area */}
+        {/* Messages Area with Scroll */}
         <div className="flex-1 overflow-hidden">
           <div className="h-full p-6">
             <Card className="h-full flex flex-col">
-              <CardContent className="flex-1 flex flex-col p-0">
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <CardContent className="flex-1 flex flex-col p-0 min-h-0">
+                {/* Messages Container with Scroll */}
+                <div 
+                  ref={messagesContainerRef}
+                  className="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth"
+                  style={{ 
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#cbd5e1 #f1f5f9'
+                  }}
+                >
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -93,6 +111,8 @@ const Chat = () => {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Loading indicator */}
                   {loading && (
                     <div className="flex justify-start">
                       <div className="bg-white text-gray-900 max-w-2xl px-6 py-4 rounded-2xl border border-gray-200 mr-12 shadow-sm">
@@ -105,10 +125,13 @@ const Chat = () => {
                       </div>
                     </div>
                   )}
+                  
+                  {/* Auto-scroll anchor */}
+                  <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Form */}
-                <div className="border-t border-gray-200 p-6">
+                {/* Fixed Input Form - Always Visible */}
+                <div className="border-t border-gray-200 p-6 flex-shrink-0 bg-white">
                   <form onSubmit={handleSendMessage} className="flex space-x-4">
                     <Input
                       value={inputMessage}
@@ -116,11 +139,12 @@ const Chat = () => {
                       placeholder="Escribe tu consulta jurídica aquí... (ej: '¿Cuáles son mis derechos como trabajador según el Estatuto de los Trabajadores?')"
                       disabled={loading}
                       className="flex-1 h-12 px-4 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      autoFocus
                     />
                     <Button 
                       type="submit" 
                       disabled={loading || !inputMessage.trim()}
-                      className="h-12 px-8 bg-blue-600 hover:bg-blue-700"
+                      className="h-12 px-8 bg-blue-600 hover:bg-blue-700 flex-shrink-0"
                     >
                       <Send className="h-4 w-4" />
                     </Button>

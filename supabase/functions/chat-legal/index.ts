@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const LEGAL_SYSTEM_PROMPT = `Eres LexIA, asistente jurídico especializado en Derecho español y europeo. Responde claramente, conservando siempre el contexto de las sesiones anteriores mediante el historial almacenado, mencionando normas o jurisprudencia aplicable cuando proceda.
+const LEGAL_SYSTEM_PROMPT = `Eres LexIA, asistente jurídico especializado en Derecho español y europeo. Responde claramente, manteniendo siempre visible el campo de entrada y permitiendo desplazarse cómodamente por mensajes largos. Conserva siempre el contexto utilizando el historial almacenado y menciona normas o jurisprudencia aplicable cuando proceda.
 
 ESPECIALIDADES PRINCIPALES:
 - Derecho Civil español (Código Civil)
