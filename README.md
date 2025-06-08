@@ -94,76 +94,103 @@ src/
 └── openai.ts # Función para llamada a OpenAI con el prompt legal
 
 
+🔄 Cambiar entre ChatGPT y Gemini
+
+La integración por defecto utiliza OpenAI GPT. Para cambiar entre ChatGPT y Gemini debes:
+
+1. Abrir el archivo:
+src/utils/openai.ts
+
+2. Reemplazar la función de llamada a OpenAI por la de Gemini, por ejemplo:
+
+Original: 
+
+// ChatGPT (por defecto)
+const response = await openai.chat.completions.create({ ... })
+
+Ajuste a gemini
+const response = await gemini.generateContent({ prompt })
 
 
-## Project info
+🚧 Mejoras pendientes
+ Implementar scroll automático en el historial largo de chat
 
-**URL**: https://lovable.dev/projects/c4f8646e-6cf6-41e8-9242-1ba13b572851
+ Permitir edición y eliminación de mensajes del usuario
 
-## How can I edit this code?
+ Añadir resumen automático de cada conversación
 
-There are several ways of editing your application.
+ Añadir selector para elegir entre ChatGPT y Gemini desde la interfaz
 
-**Use Lovable**
+ Internacionalización (i18n) para soporte multilingüe
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c4f8646e-6cf6-41e8-9242-1ba13b572851) and start prompting.
+ Validaciones de seguridad adicionales en Supabase RLS
 
-Changes made via Lovable will be committed automatically to this repo.
 
-**Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+🛠️ ¿Cómo puedo editar este código?
+Existen varias formas de editar tu aplicación:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+🔧 Usar Lovable
+Simplemente visita el proyecto en Lovable y comienza a interactuar mediante prompts.
 
-Follow these steps:
+Todos los cambios realizados desde Lovable se guardarán automáticamente en este repositorio.
+
+💻 Usar tu IDE preferido (de forma local)
+Si prefieres trabajar de forma local en tu entorno de desarrollo (VS Code, WebStorm, etc.), puedes clonar el repositorio, hacer tus cambios y subirlos.
+Los cambios también se reflejarán en Lovable.
+
+El único requisito es tener instalado Node.js y npm.
+Puedes instalarlo fácilmente con nvm:
+👉 Guía de instalación de nvm
+
+Pasos:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <https://github.com/FranciscoOcampoPredictiva/lexi-assistant-studio-spark.git>
+# Paso 1: Clona el repositorio utilizando la URL del proyecto
+git clone https://github.com/FranciscoOcampoPredictiva/lexi-assistant-studio-spark.git
 
-# Step 2: Navigate to the project directory.
-cd <lexi-assistant-studio-spark>
+# Paso 2: Accede al directorio del proyecto
+cd lexi-assistant-studio-spark
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Paso 3: Instala las dependencias necesarias
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Paso 4: Inicia el servidor de desarrollo con recarga automática
 npm run dev
+
 ```
 
-**Edit a file directly in GitHub**
+✏️ Editar un archivo directamente en GitHub
+Navega hasta el archivo que deseas modificar.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Haz clic en el botón "Editar" (ícono de lápiz) en la esquina superior derecha de la vista del archivo.
 
-**Use GitHub Codespaces**
+Realiza tus cambios y haz clic en "Commit changes" para guardarlos.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+💻 Usar GitHub Codespaces
+Ve a la página principal de tu repositorio en GitHub.
 
-## What technologies are used for this project?
+Haz clic en el botón verde "Code" en la parte superior derecha.
 
-This project is built with:
+Selecciona la pestaña "Codespaces".
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Haz clic en "New codespace" para lanzar un nuevo entorno de desarrollo.
 
-## How can I deploy this project?
+Desde allí, puedes editar los archivos directamente, y luego confirmar (commit) y enviar (push) tus cambios al repositorio.
 
-Simply open [Lovable](https://lovable.dev/projects/c4f8646e-6cf6-41e8-9242-1ba13b572851) and click on Share -> Publish.
+⚙️ ¿Qué tecnologías se utilizan en este proyecto?
+Este proyecto está desarrollado con:
 
-## Can I connect a custom domain to my Lovable project?
+Vite (entorno de desarrollo rápido)
 
-Yes, you can!
+TypeScript
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+React
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+shadcn-ui (componentes UI modernos)
+
+Tailwind CSS (estilización eficiente con utilidades)
+
+🚀 ¿Cómo puedo desplegar este proyecto?
+Simplemente abre Lovable y haz clic en Share → Publish para publicarlo fácilmente.
+
